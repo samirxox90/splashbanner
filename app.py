@@ -13,7 +13,7 @@ def format_timestamp(unix_ts):
     except:
         return "Invalid Date"
 
-def get_event_data(region='('):
+def get_event_data(region='(enter your region'):
     url = f'https://narayan-event.vercel.app/event?region={region}'
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; WebApp/1.0)"

@@ -13,7 +13,7 @@ def format_timestamp(unix_ts):
     except:
         return "Invalid Date"
 
-def get_event_data(region='(enter your region'):
+def get_event_data(region='(ind'):
     url = f'https://narayan-event.vercel.app/event?region={region}'
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; WebApp/1.0)"
@@ -181,7 +181,7 @@ HTML_TEMPLATE = """
 
 @app.route('/', methods=['GET'])
 def index():
-    region = request.args.get('region', 'ind').lower()
+    region = request.args.get('region', 'Enter Your Region').lower()
     region = ''.join(c for c in region if c.isalnum())  # Basic sanitization
 
     data = get_event_data(region)

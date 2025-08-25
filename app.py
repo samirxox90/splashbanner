@@ -13,7 +13,7 @@ def format_timestamp(unix_ts):
     except:
         return "Invalid Date"
 
-def get_event_data(region='ind'):
+def get_event_data(region='(ind'):
     url = f'https://narayan-event.vercel.app/event?region={region}'
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; WebApp/1.0)"
@@ -128,7 +128,7 @@ HTML_TEMPLATE = """
 </head>
 <body>
 <header>
-    <h1>🌍 Events in {{ region.upper() }}</h1>
+    <h1>🌍 Here Are The New Events Of {{ region.upper() }}</h1>
     <button class="toggle-btn" onclick="toggleDark()">🌓 Dark Mode</button>
 </header>
 

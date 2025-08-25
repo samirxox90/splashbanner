@@ -1,109 +1,220 @@
+from flask import Flask, request, render_template_string
+import requests
+import datetime
+
+app = Flask(__name__)
+
+def format_timestamp(unix_ts):
+    try:
+        if unix_ts and unix_ts > 0:
+            return datetime.datetime.fromtimestamp(unix_ts).strftime("%Y-%m-%d %H:%M")
+        else:
+            return "N/A"
+    except:
+        return "Invalid Date"
+
+def get_event_data(region='(ind'):
+    url = f'https://narayan-event.vercel.app/event?region={region}'
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; WebApp/1.0)"
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return None
+
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Website Under Maintenance</title>
-  <style>
-    /* Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <title>Events - {{ region.upper() }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: radial-gradient(circle at top, #4b0082, #000);
-      color: #fff;
-    }
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: #f0f2f5;
+            color: #222;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            margin: 0;
+        }
+        .toggle-btn {
+            background: none;
+            border: 1px solid #888;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        form {
+            margin-bottom: 2rem;
+        }
+        input[type="text"] {
+            padding: 8px;
+            font-size: 1rem;
+            width: 200px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 14px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .event {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .event img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .event .content {
+            padding: 1rem;
+        }
+        .event h2 {
+            font-size: 1.2rem;
+            margin: 0 0 0.5rem;
+        }
+        .event p {
+            margin: 0.5rem 0;
+        }
+        .link-btn {
+            margin-top: auto;
+            padding: 0.5rem;
+            text-align: center;
+            background-color: #0077cc;
+            color: white;
+            text-decoration: none;
+            display: block;
+            border-top: 1px solid #eee;
+        }
 
-    /* Animated background stars */
-    .stars {
-      width: 2px;
-      height: 2px;
-      background: white;
-      box-shadow: 
-        50px 80px white, 150px 120px white, 250px 200px white, 
-        350px 50px white, 450px 150px white, 550px 250px white,
-        650px 300px white, 750px 100px white, 850px 400px white,
-        950px 200px white;
-      animation: twinkle 5s infinite alternate;
-    }
+        .dark {
+            background-color: #121212;
+            color: #eee;
+        }
 
-    @keyframes twinkle {
-      from { opacity: 0.2; }
-      to { opacity: 1; }
-    }
+        .dark .event {
+            background-color: #1e1e1e;
+            color: #ccc;
+        }
 
-    /* Maintenance text */
-    .message {
-      text-align: center;
-      position: absolute;
-      z-index: 2;
-    }
-
-    .message h1 {
-      font-size: 3em;
-      color: #fff;
-      text-shadow: 0 0 15px #9d4edd, 0 0 25px #c77dff;
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 10px #9d4edd, 0 0 20px #c77dff;
-      }
-      to {
-        text-shadow: 0 0 20px #c77dff, 0 0 40px #e0aaff;
-      }
-    }
-
-    .message p {
-      margin-top: 15px;
-      font-size: 1.2em;
-      color: #ddd;
-    }
-
-    /* Floating nebula effect */
-    .nebula {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(157, 77, 237, 0.5), transparent 70%);
-      border-radius: 50%;
-      animation: float 15s infinite alternate ease-in-out;
-      filter: blur(150px);
-    }
-
-    .nebula:nth-child(2) {
-      width: 400px;
-      height: 400px;
-      left: 70%;
-      top: 20%;
-      animation-duration: 20s;
-    }
-
-    @keyframes float {
-      from { transform: translateY(0px) translateX(0px); }
-      to { transform: translateY(-50px) translateX(50px); }
-    }
-
-  </style>
+        .dark .link-btn {
+            background-color: #3380cc;
+        }
+    </style>
 </head>
 <body>
-  <div class="stars"></div>
-  <div class="nebula"></div>
-  <div class="nebula"></div>
-  
-  <div class="message">
-    <h1> Website Under Maintenance </h1>
-    <p>We’ll be back soon with something amazing!</p>
-  </div>
+<header>
+    <h1>🌍 Here Are The New Events Of {{ region.upper() }}</h1>
+    <button class="toggle-btn" onclick="toggleDark()">🌓 Dark Mode</button>
+</header>
+
+<form method="get" action="/">
+    <input type="text" name="region" value="{{ region }}" placeholder="Enter region" />
+    <button type="submit">Fetch Events</button>
+</form>
+
+{% if error %}
+    <p style="color: red;">{{ error }}</p>
+{% elif events %}
+    <div class="grid">
+        {% for event in events %}
+            <div class="event">
+                <img src="{{ event.Banner or 'https://via.placeholder.com/600x200?text=No+Image' }}" alt="Banner" />
+                <div class="content">
+                    <h2>{{ event.Title }}</h2>
+                    <p><strong>Start:</strong> {{ event.StartFormatted }}</p>
+                    <p><strong>End:</strong> {{ event.EndFormatted }}</p>
+                    <p>{{ event.Details }}</p>
+                </div>
+                {% if event.link %}
+                    <a href="{{ event.link }}" class="link-btn" target="_blank">🔗 More Info</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No events found for this region.</p>
+{% endif %}
+
+<script>
+    // On load: Apply saved dark mode setting
+    document.addEventListener("DOMContentLoaded", () => {
+        const mode = localStorage.getItem("darkMode");
+        if (mode === "enabled") {
+            document.body.classList.add("dark");
+        }
+    });
+
+    // Toggle dark mode and save preference
+    function toggleDark() {
+        const isDark = document.body.classList.toggle("dark");
+        localStorage.setItem("darkMode", isDark ? "enabled" : "disabled");
+    }
+</script>
 </body>
 </html>
+"""
+
+@app.route('/', methods=['GET'])
+def index():
+    region = request.args.get('region', 'sg').lower()
+    region = ''.join(c for c in region if c.isalnum())  # Basic sanitization
+
+    data = get_event_data(region)
+
+    if data is None:
+        return render_template_string(HTML_TEMPLATE, region=region, events=None, error="Failed to fetch event data.")
+    
+    if isinstance(data, list):
+        events = data
+    elif isinstance(data, dict):
+        events = data.get("events") or data.get("Events") or []
+    else:
+        events = []
+
+    cleaned_events = []
+    for e in events:
+        title = e.get("Title") or e.get("title") or "Untitled Event"
+        details = e.get("Details") or e.get("details") or "No details available."
+        start = e.get("Start") or 0
+        end = e.get("End") or 0
+        link = e.get("link") or e.get("Link") or ""
+        banner = e.get("Banner") or e.get("banner") or ""
+
+        cleaned_events.append({
+            "Title": title,
+            "Details": details.strip(),
+            "StartFormatted": format_timestamp(start),
+            "EndFormatted": format_timestamp(end),
+            "link": link,
+            "Banner": banner,
+        })
+
+    return render_template_string(HTML_TEMPLATE, region=region, events=cleaned_events, error=None)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

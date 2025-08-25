@@ -181,7 +181,7 @@ HTML_TEMPLATE = """
 
 @app.route('/', methods=['GET'])
 def index():
-    region = request.args.get('region', 'Enter Your Region').lower()
+    region = request.args.get('region', 'th').lower()
     region = ''.join(c for c in region if c.isalnum())  # Basic sanitization
 
     data = get_event_data(region)

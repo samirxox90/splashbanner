@@ -1,4 +1,2 @@
-flask
-protobuf
-pycryptodome
-requests
+Flask==2.2.5
+requests==2.31.0

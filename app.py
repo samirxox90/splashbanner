@@ -14,7 +14,7 @@ def format_timestamp(unix_ts):
         return "Invalid Date"
 
 def get_event_data(region='(ind'):
-    url = f'https://banner-info.vercel.app/get_data?region={region}&language=en'
+    url = f'https://banner-info.vercel.app/get_data?region={region}'
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; WebApp/1.0)"
     }
